@@ -1,0 +1,135 @@
+{
+  "project_context": {
+    "domain": "Freelance Web Development Portfolio / Landing Page Services",
+    "theme": "Dark",
+    "archetype": "Archetype 5 (Jewel & Luxury) mixed with High-End Tech",
+    "emotional_tone": "Premium, Exclusive, Fast, Trustworthy, Modern"
+  },
+  "colors": {
+    "background": {
+      "base": "#0B0B0C",
+      "surface": "#1A1B1F",
+      "surface_elevated": "#27282D"
+    },
+    "brand": {
+      "primary": "#D4AF37",
+      "primary_hover": "#F5D97A",
+      "primary_muted": "rgba(212, 175, 55, 0.15)"
+    },
+    "text": {
+      "main": "#F5E6C8",
+      "muted": "#A1A1AA",
+      "inverse": "#050509"
+    },
+    "borders": {
+      "default": "rgba(255, 255, 255, 0.1)",
+      "highlight": "rgba(212, 175, 55, 0.3)"
+    }
+  },
+  "typography": {
+    "font_families": {
+      "headings": "Outfit, sans-serif",
+      "body": "Manrope, sans-serif",
+      "accent": "Playfair Display, serif"
+    },
+    "scale": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tighter font-medium",
+      "h2": "text-3xl sm:text-4xl tracking-tight font-medium",
+      "h3": "text-xl sm:text-2xl font-medium",
+      "body": "text-base leading-relaxed text-zinc-400",
+      "small": "text-sm tracking-wide uppercase text-zinc-500"
+    }
+  },
+  "spacing_and_layout": {
+    "philosophy": "Generous spacing. Use p-8 to p-16 for inner card padding, and py-24 to py-32 for section padding.",
+    "container": "max-w-7xl mx-auto px-6 lg:px-8",
+    "grids": {
+      "bento": "grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8",
+      "portfolio": "grid grid-cols-1 lg:grid-cols-3 gap-10"
+    }
+  },
+  "surfaces_and_borders": {
+    "cards": "bg-[#1A1B1F]/50 backdrop-blur-xl border border-white/5 rounded-2xl p-8 hover:border-[#D4AF37]/30 transition-colors duration-300",
+    "glassmorphism": "bg-black/60 backdrop-blur-2xl border-b border-white/10"
+  },
+  "media": {
+    "hero_background": {
+      "url": "https://images.unsplash.com/photo-1647101734210-ff5d79813069?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzZ8MHwxfHNlYXJjaHwzfHxkYXJrJTIwZ29sZCUyMGFic3RyYWN0fGVufDB8fHx8MTc3NzM0Mjk4N3ww&ixlib=rb-4.1.0&q=85",
+      "description": "Dark gold abstract swirls. Use as an ultra-low opacity (10-15%) overlay behind the hero section with mask-image fading to bottom."
+    },
+    "personal_photo": {
+      "url": "https://customer-assets.emergentagent.com/job_47496f62-def4-4a63-adb1-784a8ff3c743/artifacts/s8d620v3_eupng.png",
+      "description": "Gustavo Borges personal photo. Use in the 'Sobre' section."
+    },
+    "portfolio_mockups": {
+      "url": "https://images.unsplash.com/photo-1590965918603-0dce981d13b8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2MzR8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjBkYXJrJTIwbW9ja3VwfGVufDB8fHx8MTc3NzM0Mjk4N3ww&ixlib=rb-4.1.0&q=85",
+      "description": "Fallback laptop mockup image if iframe previews cannot be rendered due to CORS/X-Frame-Options."
+    }
+  },
+  "sections_instructions": {
+    "header": {
+      "behavior": "Sticky header (z-50) using crystal glassmorphism.",
+      "content": "Logo 'Gustavo Borges' on left. Nav links in center. 'WhatsApp' primary button on right."
+    },
+    "hero": {
+      "layout": "Center-aligned, massive emphasis on typography. Generous negative space.",
+      "title": "Criação de Landing Pages que Aumentam a Visibilidade do Seu Negócio",
+      "subtitle": "Receba seu site pronto em até 1 dia, com suporte completo para domínio e publicação.",
+      "ctas": [
+        "Primary: '🔥 Solicitar meu site' (bg-[#D4AF37] text-black font-semibold rounded-full px-8 py-4, hover:bg-[#F5D97A] shadow-[0_0_20px_rgba(212,175,55,0.3)]) - Links to WhatsApp",
+        "Secondary: '📱 Falar no WhatsApp' (outline variant)",
+        "Secondary: '📸 Ver Instagram' (ghost variant)"
+      ]
+    },
+    "about": {
+      "layout": "2-column grid. Left: Image of Gustavo. Right: Bio text.",
+      "content": "Sou desenvolvedor especializado em landing pages para comércios físicos e digitais. Meu foco é simples: transformar visitantes em clientes, com páginas rápidas, modernas e otimizadas.",
+      "image_treatment": "Use the personal_photo URL. Place it inside a card with a subtle gold glowing border."
+    },
+    "benefits": {
+      "layout": "Bento Grid (Mode A).",
+      "items": [
+        "Aumento visibilidade online",
+        "Facilidade de contato",
+        "Página focada em conversão",
+        "Entrega em até 24h",
+        "Ajuda com domínio",
+        "Suporte inicial"
+      ],
+      "styling": "Cards with icons (@phosphor-icons/react or lucide-react in gold). Smooth hover effects."
+    },
+    "portfolio": {
+      "layout": "3-column grid highlighting the 3 projects.",
+      "projects": [
+        {"name": "TSM Printer Solutions", "url": "https://landingtsm.netlify.app/"},
+        {"name": "Valens Cestas", "url": "https://valenscestas.netlify.app/"},
+        {"name": "Bicycle", "url": "https://bicyclesg.netlify.app/"}
+      ],
+      "preview_strategy": "Attempt to use scaled <iframe src='...'> wrapped in a container with pointer-events-none and overflow-hidden to act as a live thumbnail. If iframe fails, use the fallback laptop mockup media URL. Include an external link button 'Acessar Site'."
+    },
+    "how_it_works": {
+      "layout": "Vertical timeline or 5-step horizontal bento sequence.",
+      "steps": "5 passos simples (Define 5 logical steps like: 1. Contato, 2. Briefing, 3. Design, 4. Revisão, 5. Lançamento)."
+    },
+    "proof_and_guarantee": {
+      "layout": "High-impact banner section.",
+      "guarantee": "Entrego seu site em até 24h ou você não paga pela urgência.",
+      "counter": "Dynamic counter '+10 sites entregues'. Fetch from backend (mock API response if not ready, but ensure it's a dynamic React state).",
+      "niches": "Display badges for: restaurantes, lojas, serviços, salões de festa. Badges should have border-[#D4AF37]/50 text-[#D4AF37]."
+    },
+    "footer_and_cta": {
+      "cta": "Pronto para colocar seu negócio no digital?",
+      "brand": "por Gustavo Borges",
+      "tagline": "Não sou o nadador, mas sei mergulhar fundo no que realmente importa: resultados.",
+      "links": "WhatsApp: https://wa.me/5521987018600 | Instagram: https://www.instagram.com/dedsec.jar/",
+      "floating_action": "Add a fixed floating WhatsApp button at bottom right (z-50)."
+    }
+  },
+  "animation_guidelines": {
+    "engine": "Framer Motion",
+    "rules": "Fade-up on scroll for all sections. Staggered fade-ins for bento cards and portfolio items. Smooth hover scaling (1.02) on cards."
+  },
+  "testing": {
+    "rules": "All interactive elements (buttons, links, form inputs) must include data-testid. e.g., data-testid='hero-whatsapp-btn'"
+  }
+}
