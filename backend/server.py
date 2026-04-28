@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -14,59 +14,111 @@ from datetime import datetime, timezone
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Create the main app without a prefix
 app = FastAPI()
-
-# Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
 
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
+# ---------- Models ----------
+class Stats(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    sites_delivered: int = 10
+    niches: List[str] = Field(default_factory=lambda: [
+        "Restaurantes", "Lojas", "Serviços", "Salões de festa"
+    ])
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class StatsUpdate(BaseModel):
+    sites_delivered: int | None = None
+    niches: List[str] | None = None
+
+
+class Lead(BaseModel):
+    model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    name: str | None = None
+    business_type: str | None = None
+    contact: str | None = None
+    message: str | None = None
+    source: str = "website"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
 
-# Add your routes to the router instead of directly to app
+class LeadCreate(BaseModel):
+    name: str | None = None
+    business_type: str | None = None
+    contact: str | None = None
+    message: str | None = None
+    source: str = "website"
+
+
+# ---------- Helpers ----------
+STATS_KEY = "public"
+
+async def ensure_stats():
+    existing = await db.stats.find_one({"key": STATS_KEY}, {"_id": 0})
+    if not existing:
+        stats = Stats()
+        doc = stats.model_dump()
+        doc["updated_at"] = doc["updated_at"].isoformat()
+        doc["key"] = STATS_KEY
+        await db.stats.insert_one(doc)
+        return stats
+    # hydrate
+    if isinstance(existing.get("updated_at"), str):
+        existing["updated_at"] = datetime.fromisoformat(existing["updated_at"])
+    existing.pop("key", None)
+    return Stats(**existing)
+
+
+# ---------- Routes ----------
 @api_router.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Gustavo Borges Landing API"}
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
 
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
+@api_router.get("/stats", response_model=Stats)
+async def get_stats():
+    return await ensure_stats()
 
-# Include the router in the main app
+
+@api_router.put("/stats", response_model=Stats)
+async def update_stats(payload: StatsUpdate):
+    current = await ensure_stats()
+    data = current.model_dump()
+    if payload.sites_delivered is not None:
+        data["sites_delivered"] = max(0, int(payload.sites_delivered))
+    if payload.niches is not None:
+        data["niches"] = payload.niches
+    data["updated_at"] = datetime.now(timezone.utc)
+
+    doc = {**data, "updated_at": data["updated_at"].isoformat(), "key": STATS_KEY}
+    await db.stats.update_one({"key": STATS_KEY}, {"$set": doc}, upsert=True)
+    return Stats(**data)
+
+
+@api_router.post("/leads", response_model=Lead)
+async def create_lead(payload: LeadCreate):
+    lead = Lead(**payload.model_dump())
+    doc = lead.model_dump()
+    doc["created_at"] = doc["created_at"].isoformat()
+    await db.leads.insert_one(doc)
+    return lead
+
+
+@api_router.get("/leads", response_model=List[Lead])
+async def list_leads():
+    raw = await db.leads.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+    for r in raw:
+        if isinstance(r.get("created_at"), str):
+            r["created_at"] = datetime.fromisoformat(r["created_at"])
+    return raw
+
+
 app.include_router(api_router)
 
 app.add_middleware(
@@ -77,12 +129,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+
+@app.on_event("startup")
+async def startup_event():
+    await ensure_stats()
+
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
