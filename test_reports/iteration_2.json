@@ -1,0 +1,37 @@
+{
+  "summary": "Tested admin panel single-password auth (gustavo2026) end-to-end. Backend: 14/14 pytest cases pass — admin login (correct/wrong), JWT verify (none/invalid/valid), brute-force lockout after 5 failures (429 + 'Muitas tentativas'), protected PUT /api/stats and GET /api/leads, public GET /api/stats and POST /api/leads, no _id leak anywhere. Frontend: /admin/login renders with correct testids, wrong password shows red 'Senha incorreta' error, /admin without token redirects to /admin/login, correct password navigates to panel and stores gb_admin_token in localStorage, sites_delivered edit + save persists to backend (verified via /api/stats=17), niche add/remove works, green success notice appears, logout clears token and redirects, landing page (/) still loads.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py:124-133 — check_lockout() has a redundant 'count >= MAX_ATTEMPTS' fallback branch. Once register_failure sets locked_until at count==5, the locked_until check above already catches it; the second branch is only hit if locked_until somehow wasn't set. Harmless but dead code on the happy path.",
+    "server.py:199 — hmac.compare_digest is good (constant-time compare). Good practice.",
+    "server.py:239-245 — CORS allow_credentials=True with allow_origins='*' is invalid per the CORS spec; browsers will reject credentialed requests. Currently OK because the frontend uses Bearer tokens (not cookies), but if cookies are ever added this must be tightened to an explicit origin list.",
+    "server.py:254-257 — startup_event uses deprecated FastAPI on_event; consider migrating to lifespan context manager (non-blocking).",
+    "AdminLogin.jsx:30 — error display reads err.response?.data?.detail, which on 429 lockout is the Portuguese 'Muitas tentativas' string — handled correctly via formatApiError.",
+    "AdminPanel.jsx:182 — sitesDelivered stored as string from input; converted via Number() at save time. Works but allows visually-empty input; backend coerces to max(0, int()) so safe.",
+    "JWT_SECRET committed to .env in repo — acceptable for preview env, must be rotated and stored in secret manager for production.",
+    "No rate limit on POST /api/leads — public endpoint could be spammed. Out of scope for this iteration but worth noting."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "Admin password: gustavo2026 (from /app/memory/test_credentials.md and ADMIN_PASSWORD in /app/backend/.env)",
+  "seed_data_creation": "None. Test cleans up its own login_attempts collection (via pymongo) before/after the brute-force test. sites_delivered restored to 10 after frontend test.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "14 pytest cases at /app/backend/tests/backend_test.py cover full admin auth flow + brute-force. The brute-force test resets the login_attempts collection before AND after running so it does not poison other runs. If you change ADMIN_PASSWORD, update the ADMIN_PASSWORD constant at the top of backend_test.py. Iframed Netlify portfolio sites emit a 'createAxiosClient is not defined' console error — this is third-party noise from /portfolio iframes, not this app.",
+  "rca of the issue": "No issues found. All 14 backend tests + 8 frontend flow checks pass."
+}
