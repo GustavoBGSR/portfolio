@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import "@/App.css";
-import axios from "axios";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { Header } from "@/components/site/Header";
@@ -14,34 +13,15 @@ import { FinalCTA } from "@/components/site/FinalCTA";
 import { Footer } from "@/components/site/Footer";
 import { FloatingWhatsApp } from "@/components/site/FloatingWhatsApp";
 import { useRevealOnScroll } from "@/lib/reveal";
-import AdminLogin from "@/pages/AdminLogin";
-import AdminPanel from "@/pages/AdminPanel";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+const SITE_STATS = {
+  sites_delivered: 10,
+  niches: ["Restaurantes", "Lojas", "Serviços", "Salões de festa"],
+};
 
 const Landing = () => {
-  const [stats, setStats] = useState({
-    sites_delivered: 10,
-    niches: ["Restaurantes", "Lojas", "Serviços", "Salões de festa"],
-  });
-
+  const [stats] = useState(SITE_STATS);
   useRevealOnScroll();
-
-  useEffect(() => {
-    let mounted = true;
-    axios
-      .get(`${API}/stats`)
-      .then((res) => {
-        if (mounted && res.data) setStats(res.data);
-      })
-      .catch(() => {
-        /* silent - fallback defaults */
-      });
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   return (
     <div className="relative min-h-screen grain" data-testid="landing-root">
@@ -66,8 +46,6 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin" element={<AdminPanel />} />
       </Routes>
     </BrowserRouter>
   );
